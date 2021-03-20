@@ -24,8 +24,6 @@
 #include <assert.h>
 #include <math.h>
 
-#include "md5.h"
-#include "sm3.h"
 #include "hashselect.h"
 
 // chain parameters access

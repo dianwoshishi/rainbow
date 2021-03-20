@@ -23,11 +23,9 @@
 #include <time.h>
 #include <pthread.h>
 
-#include "md5.h"
 #include "crack.h"
 #include "utils.h"
 
-#include "sm3.h"
 #include "hashselect.h"
 
 #define ERROR(...)                    \
