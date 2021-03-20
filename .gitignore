@@ -4,3 +4,4 @@ rtgen
 rt/
 .vscode/
 rainbow table.bt
+*.rt
