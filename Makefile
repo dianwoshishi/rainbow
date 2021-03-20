@@ -7,7 +7,7 @@ TARGETS = rtgen rtcrack
 
 all: $(TARGETS)
 
-rt%: rt%.o sm3.o md5.o rtable.o hashselect.h
+rt%: rt%.o sm3.o md5.o sha1.o sha256.o rtable.o hashselect.h
 	@mkdir -p $(@D)
 	$(CC) $(HASH)=1 $^ -o $@ $(LDFLAGS)
 

@@ -7,7 +7,7 @@ Rainbow tables
 --------------
 
 We consider the problem of finding back a value from its hash (in the
-current implementation, MD5 and SM3). Formally, we want to perform a preimage
+current implementation, MD5, SHA1, SHA256 and SM3). Formally, we want to perform a preimage
 attack. Since hash functions are designed to be resistant to preimage
 attacks, we are often reduced to brute forcing: consider every single
 possible value, hash it and match it against the target hash. This is
@@ -82,7 +82,7 @@ but can be changed easily.
 
 Compile
 --------
-
+system: Linux
 use the paramter "HASH" to control the compile process when use "make",just like below:
 
 >make destroy
@@ -107,6 +107,18 @@ Attempt to crack a value with this table:
     750f4b11bbd880f9fb9bcd0c24b7b473  -
     $ ./rtcrack -x $(echo -n 6c02ec | md5sum) alpha4.rt
     750f4b11bbd880f9fb9bcd0c24b7b473 6c02ec
+
+    # for SHA1
+    $ echo -n gPO100 | sha1sum                                      
+    23a171799896ec207e64317d50d5d228b20ae15f  -
+    $ ./rtcrack -x $(echo -n gPO100 | sha1sum) alpha4.rt
+    c600f900c711b0fe548b922c157f9dc1864ff06b gPO100
+
+    # for SHA256
+    $ echo -n j70000 | sha256sum                                      
+    54b112f3a7214022afe20797c42983f9fb0d87ee4c6658791f8bc001a79653f8  -
+    $ ./rtcrack -x $(echo -n j70000 | sha256sum ) alpha4.rt
+    54b112f3a7214022afe20797c42983f9fb0d87ee4c6658791f8bc001a79653f8 j70000
     
     # for SM3
     $ echo -n mm8200 | python3 sm3/sm3.py
@@ -130,6 +142,24 @@ reduction seeds and in several parts:
     $ ./gen.sh 6 1000 1000000 0 10 1
     $ ./rtcrack -r 1000 rt/alnum_6_1000_1000000_1/*
     992 / 1000
+
+Add Hash Function
+---
+To add a hash function(eg. sha1) to this project, you should have the sha1.h and sha1.c files.
+1. in the sha1.h, you should define a micro named "SHA1_DIGEST_LENGTH", the value of it is the length of the hash function output(by bytes), for sha1 it is 20(sha1 output is 160 bits, 160/8=20bytes).
+At the same time, you should define a function, which is fit to the interface below:
+    typedef void HASHptr(uint8_t* dst, const uint8_t* src, uint64_t slen);//in the hashselect.h file
+    //you can do like this:
+    void SHA1(uint8_t *dst, const uint8_t* src, uint64_t slen);
+2. in the sha1.c, implement correct
+3. in the hashselect.h, you should include the "sha1.h", and add below:
+    #elif _SHA1 //a macro named "_SHA1"
+    #define DIGEST_LENGTH SHA1_DIGEST_LENGTH //in sha1.h
+    static HASHptr *my_hash = &SHA1;    // in sha1.h , and the "SHA1" is your implement
+
+4. finally, you should add the sha1.o in Makefile, to make sure you can compile it correctly.
+to complie it ,you can do like this:
+    make HASH=-D_SHA1
 
 Licence
 -------
