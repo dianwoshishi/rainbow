@@ -19,6 +19,7 @@
 #ifndef MD5_H
 #define MD5_H
 
+#define MD5_DIGEST_LENGTH  16
 // MD5 provides a 16 byte hash
 #include <stdint.h>
 
@@ -38,6 +39,6 @@ void MD5Block (MD5_CTX* md5, const uint8_t block[64]);
 void MD5Update(MD5_CTX* md5, const uint8_t* data, uint64_t len);
 void MD5Final (MD5_CTX* md5, uint8_t dst[16]);
 
-void MD5(uint8_t dst[16], const uint8_t* src, uint64_t slen);
+void MD5(uint8_t *dst, const uint8_t* src, uint64_t slen);
 
 #endif

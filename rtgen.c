@@ -24,6 +24,8 @@
 
 #include "rtable.h"
 
+#include "hashselect.h"
+
 static inline void rewriteLine(void)
 {
 	printf("\r\33[K");
@@ -35,7 +37,7 @@ static void stopGenerating(int signal)
 	(void) signal;
 	generate = 0;
 }
-
+// progress bar
 static void progress(float ratio)
 {
 	// compute the total elapsed time and
@@ -131,8 +133,9 @@ int main(int argc, char** argv)
 		usage(argc, argv);
 		exit(1);
 	}
-
-	char* charset  = "0123456789abcdefghijklmnopqrstuvwxyz";
+	// char set: number and lowcase characteristic
+	char* charset  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    // char* charset  = "0123456789abcdefghijklmnopqrstuvwxyz";
 	u32   l_string = atol(argv[1]);
 	u32   s_reduce = atol(argv[2]);
 	u32   l_chains = atol(argv[3]);
@@ -143,8 +146,8 @@ int main(int argc, char** argv)
 
 	// init table
 	RTable rt;
-	if (!RTable_FromFile(&rt, filename))
-		RTable_New(&rt, l_string, charset, s_reduce, l_chains, n_chains);
+	if (!RTable_FromFile(&rt, filename, DIGEST_LENGTH))
+		RTable_New(&rt, l_string, charset, s_reduce, l_chains, n_chains, DIGEST_LENGTH);
 	srandom(time(NULL));
 
 	u32 startNChains = rt.n_chains;

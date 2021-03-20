@@ -7,7 +7,7 @@ Rainbow tables
 --------------
 
 We consider the problem of finding back a value from its hash (in the
-current implementation, MD5). Formally, we want to perform a preimage
+current implementation, MD5 and SM3). Formally, we want to perform a preimage
 attack. Since hash functions are designed to be resistant to preimage
 attacks, we are often reduced to brute forcing: consider every single
 possible value, hash it and match it against the target hash. This is
@@ -80,19 +80,44 @@ The keyspace is usually defined by the number and the set of characters
 (charset) that makes a value. The charset is hardcoded in this program
 but can be changed easily.
 
+Compile
+--------
+
+use the paramter "HASH" to control the compile process when use "make",just like below:
+
+>make destroy
+>
+>make HASH=-D_SM3 //compile the sm3 gen crack program
+>
+> //make HASH=-D_MD5 //compile the sm3 gen crack program
+>
+>
+
 Examples
 --------
 
 Generate a single (weak) rainbow table for 6 character words:
 
-    $ ./rtgen 6 0 1000 500000 1 0 alpha4.rt
+    $ ./rtgen 6 0 2500 500000 1 0 alpha4.rt
 
 Attempt to crack a value with this table:
 
+    # for MD5
     $ echo -n 6c02ec | md5sum                                      
     750f4b11bbd880f9fb9bcd0c24b7b473  -
-    $ ./rtcrack -x 750f4b11bbd880f9fb9bcd0c24b7b473 alpha4.rt
+    $ ./rtcrack -x $(echo -n 6c02ec | md5sum) alpha4.rt
     750f4b11bbd880f9fb9bcd0c24b7b473 6c02ec
+    
+    # for SM3
+    $ echo -n mm8200 | python3 sm3/sm3.py
+    c1bf0d86d772d904c0e6268760cac9b0256d09fb60e44360ef1c996c1a4d0389
+    $ ./rtcrack -x $(echo -n mm8200 | python3 sm3/sm3.py) alpha4.rt
+    c1bf0d86d772d904c0e6268760cac9b0256d09fb60e44360ef1c996c1a4d0389 mm8200
+    $ ./rtcrack -x $(echo -n 0oz100 | python3 sm3/sm3.py) rt/alnum_6_1000_1000000_1/*
+    425edaf85aae854ffe4c1269a36206cfa68d5dc363966807c6127c0b1c826d3a 0oz100
+
+
+
 
 You can test how efficient a table is by cracking for random values:
 
@@ -102,7 +127,7 @@ You can test how efficient a table is by cracking for random values:
 A bash script makes it easy to generate rainbow tables for several
 reduction seeds and in several parts:
 
-    $ ./gen.sh 6 1000 1000000 0 50 1
+    $ ./gen.sh 6 1000 1000000 0 10 1
     $ ./rtcrack -r 1000 rt/alnum_6_1000_1000000_1/*
     992 / 1000
 

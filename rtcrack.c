@@ -27,6 +27,9 @@
 #include "crack.h"
 #include "utils.h"
 
+#include "sm3.h"
+#include "hashselect.h"
+
 #define ERROR(...)                    \
 {                                     \
 	fprintf(stderr, __VA_ARGS__); \
@@ -50,7 +53,7 @@ static void* prepareNextTable(void* param)
 {
 	(void) param;
 	rt = rt == &rt1 ? &rt2 : &rt1;
-	RTable_FromFile(rt, files[cur_f++]);
+	RTable_FromFile(rt, files[cur_f++], DIGEST_LENGTH);
 	return NULL;
 }
 
@@ -82,7 +85,7 @@ static void reverseHashes(char** hashes, size_t count, char verbose)
 		}
 		else
 		{
-			RTable_FromFile(&rt1, files[i]);
+			RTable_FromFile(&rt1, files[i], DIGEST_LENGTH	);
 			loaded = &rt1;
 		}
 
@@ -90,18 +93,18 @@ static void reverseHashes(char** hashes, size_t count, char verbose)
 		for (size_t j = 0; j < count; j++)
 		{
 			char* hash = hashes[j];
-			if (hash[16])
+			if (hash[DIGEST_LENGTH])
 				continue;
 
 			char res = RTable_Reverse(loaded, hash, bufstr);
 			if (res)
 			{
-				hash[16] = 1;
+				hash[DIGEST_LENGTH] = 1;
 				done++;
 				rewriteLine();
 				if (verbose)
 				{
-					printHexaBin(hash, 16);
+					printHexaBin(hash, DIGEST_LENGTH);
 					printf(" ");
 					printString(bufstr, loaded->l_string);
 					printf("\n");
@@ -208,7 +211,7 @@ int main(int argc, char** argv)
 
 	// some parameters
 	// TODO
-	RTable_FromFile(&rt1, files[0]);
+	RTable_FromFile(&rt1, files[0], DIGEST_LENGTH);
 	u32   l_string  = rt1.l_string;
 	char* charset   = rt1.charset;
 	u32   n_charset = rt1.n_charset;
@@ -225,10 +228,10 @@ int main(int argc, char** argv)
 	{
 	case T_HASH:
 		(void) 0;
-		char* hash = (char*) malloc(17);;
+		char* hash = (char*) malloc(DIGEST_LENGTH + 1);;
 		assert(hash);
-		hex2bin(hash, tparam, 16);
-		hash[16] = 0; // pending
+		hex2bin(hash, tparam, DIGEST_LENGTH);
+		hash[DIGEST_LENGTH] = 0; // pending
 
 		reverseHashes(&hash, 1, 1);
 
@@ -265,10 +268,10 @@ int main(int argc, char** argv)
 				assert(hashes);
 			}
 
-			char* hash = (char*) malloc(17);
+			char* hash = (char*) malloc(DIGEST_LENGTH + 1);
 			assert(hash);
-			hex2bin(hash, line, 16);
-			hash[16] = 0; // pending
+			hex2bin(hash, line, DIGEST_LENGTH);
+			hash[DIGEST_LENGTH] = 0; // pending
 			hashes[n_hashes++] = hash;
 		}
 		fclose(f);
@@ -286,11 +289,11 @@ int main(int argc, char** argv)
 		assert(hashes);
 		for (size_t i = 0; i < n_hashes; i++)
 		{
-			char* hash = hashes[i] = (char*) malloc(17);
+			char* hash = hashes[i] = (char*) malloc(DIGEST_LENGTH);
 			for (size_t j = 0; j < l_string; j++)
 				bufstr[j] = charset[random() % n_charset];
-			MD5((u8*) hash, (u8*) bufstr, l_string);
-			hash[16] = 0; // pending
+			my_hash((u8*) hash, (u8*) bufstr, l_string);
+			hash[DIGEST_LENGTH] = 0; // pending
 		}
 
 		reverseHashes(hashes, n_hashes, 0);

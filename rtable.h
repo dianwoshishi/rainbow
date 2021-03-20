@@ -34,7 +34,7 @@ typedef struct __attribute__((packed))
 	u32 s_reduce;
 	u32 l_chains;
 	u32 n_chains;
-	u32 n_charset;
+	u32 n_charset;// char set , eg 12345678...
 } RTF_header;
 
 typedef struct
@@ -58,7 +58,7 @@ typedef struct
 } RTable;
 
 // generation
-void RTable_New     (RTable* rt, u32 l_string, const char* charset, u32 s_reduce, u32 l_chains, u32 a_chains);
+void RTable_New     (RTable* rt, u32 l_string, const char* charset, u32 s_reduce, u32 l_chains, u32 a_chains, u32 l_hash);
 void RTable_Delete  (RTable* rt);
 char RTable_AddChain(RTable* rt, const char* hash, const char* str);
 char RTable_StartAt (RTable* rt, u64 index);
@@ -66,7 +66,7 @@ void RTable_Sort    (RTable* rt);
 
 // loading and storing
 void RTable_ToFile  (RTable* rt, const char* filename);
-char RTable_FromFile(RTable* rt, const char* filename);
+char RTable_FromFile(RTable* rt, const char* filename, u32 l_hash);
 
 char RTable_Reverse(RTable* rt, const char* hash, char* dst);
 

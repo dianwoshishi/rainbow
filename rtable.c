@@ -25,17 +25,19 @@
 #include <math.h>
 
 #include "md5.h"
+#include "sm3.h"
+#include "hashselect.h"
 
 // chain parameters access
 #define  CACTIVE(I) (rt->chains  [ (I)*rt->sizeofChain  ] )
 #define    CHASH(I) (rt->chains  + (I)*rt->sizeofChain  + 1)
 #define     CSTR(I) (rt->chains  + (I)*rt->sizeofChain  + 1 + rt->l_hash)
 
-void RTable_New(RTable* rt, u32 l_string, const char* charset, u32 s_reduce, u32 l_chains, u32 a_chains)
+void RTable_New(RTable* rt, u32 l_string, const char* charset, u32 s_reduce, u32 l_chains, u32 a_chains, u32 l_hash)
 {
 	rt->n_chains = 0;
 
-	rt->l_hash = 16;
+	rt->l_hash = l_hash;
 	rt->l_string = l_string;
 	rt->sizeofChain = 1 + rt->l_hash + rt->l_string;
 
@@ -101,11 +103,11 @@ char RTable_StartAt(RTable* rt, u64 index)
 		return -1;
 
 	// start a new chain from 'str'
-	MD5((u8*) rt->bufhash, (u8*) rt->curstr, rt->l_string);
+	my_hash((u8*) rt->bufhash, (u8*) rt->curstr, rt->l_string);
 	for (u32 step = 1; step < rt->l_chains; step++)
 	{
 		RTable_Reduce(rt, step, rt->bufhash, rt->bufstr);
-		MD5((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
+		my_hash((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
 	}
 
 	return RTable_AddChain(rt, rt->bufhash, rt->curstr);
@@ -151,14 +153,15 @@ void RTable_ToFile(RTable* rt, const char* filename)
 	fclose(f);
 }
 
-char RTable_FromFile(RTable* rt, const char* filename)
+//	when broken, restart from the exist file
+char RTable_FromFile(RTable* rt, const char* filename, u32 l_hash)
 {
 	FILE* f = fopen(filename, "r");
 	if (!f)
 		return 0;
 
 	RTF_header h;
-	fread(&h, sizeof(RTF_header), 1, f);
+	fread(&h, sizeof(RTF_header), 1, f);// read file header
 
 	// TODO : avoid allocating and freeing charset
 	char* charset = malloc(h.n_charset + 1);
@@ -167,7 +170,8 @@ char RTable_FromFile(RTable* rt, const char* filename)
 	charset[h.n_charset] = 0;
 
 //	if (rt) RTable_Delete(rt); // TODO
-	RTable_New(rt, h.l_string, charset, h.s_reduce, h.l_chains, h.n_chains);
+	//alloc a table for the rainbow table
+	RTable_New(rt, h.l_string, charset, h.s_reduce, h.l_chains, h.n_chains, l_hash);
 	free(charset);
 
 	fread(rt->curstr, 1,               rt->l_string, f);
@@ -208,7 +212,7 @@ char RTable_Reverse(RTable* rt, const char* hash, char* dst)
 		for (u32 step = firstStep; step < rt->l_chains; step++)
 		{
 			RTable_Reduce(rt, step, rt->bufhash, rt->bufstr);
-			MD5((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
+			my_hash((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
 		}
 
 		// find the hash's chain
@@ -218,11 +222,11 @@ char RTable_Reverse(RTable* rt, const char* hash, char* dst)
 
 		// get the previous string
 		memcpy(rt->bufstr, CSTR(res), rt->l_string);
-		MD5((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
+		my_hash((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
 		for (u32 step = 1; step < firstStep; step++)
 		{
 			RTable_Reduce(rt, step, rt->bufhash, rt->bufstr);
-			MD5((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
+			my_hash((u8*) rt->bufhash, (u8*) rt->bufstr, rt->l_string);
 		}
 
 		// check for its hash
