@@ -1,3 +1,4 @@
+
 #include "md5.h"
 #include "sm3.h"
 #include "sha1.h"
@@ -22,4 +23,3 @@ static HASHptr *my_hash = &SHA256;
 #else//默认md5
 #define DIGEST_LENGTH MD5_DIGEST_LENGTH
 static HASHptr *my_hash = &MD5; 
-#endif

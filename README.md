@@ -107,6 +107,18 @@ Attempt to crack a value with this table:
     750f4b11bbd880f9fb9bcd0c24b7b473  -
     $ ./rtcrack -x $(echo -n 6c02ec | md5sum) alpha4.rt
     750f4b11bbd880f9fb9bcd0c24b7b473 6c02ec
+
+    # for SHA1
+    $ echo -n gPO100 | sha1sum                                      
+    23a171799896ec207e64317d50d5d228b20ae15f  -
+    $ ./rtcrack -x $(echo -n gPO100 | sha1sum) alpha4.rt
+    c600f900c711b0fe548b922c157f9dc1864ff06b gPO100
+
+    # for SHA256
+    $ echo -n j70000 | sha256sum                                      
+    54b112f3a7214022afe20797c42983f9fb0d87ee4c6658791f8bc001a79653f8  -
+    $ ./rtcrack -x $(echo -n j70000 | sha256sum ) alpha4.rt
+    54b112f3a7214022afe20797c42983f9fb0d87ee4c6658791f8bc001a79653f8 j70000
     
     # for SHA1
     $ echo -n gPO100 | sha1sum                                      
@@ -148,6 +160,7 @@ Add Hash Function
 To add a hash function(eg. sha1) to this project, you should have the sha1.h and sha1.c files.
 1. in the sha1.h, you should define a micro named "SHA1_DIGEST_LENGTH", the value of it is the length of the hash function output(by bytes), for sha1 it is 20(sha1 output is 160 bits, 160/8=20bytes).
 At the same time, you should define a function, which is fit to the interface below:
+
    
    > typedef void HASHptr(uint8_t* dst, const uint8_t* src, uint64_t slen);//in the hashselect.h file
    >  //you can do like this:
@@ -163,6 +176,7 @@ At the same time, you should define a function, which is fit to the interface be
 to complie it ,you can do like this:
    
    > make HASH=-D_SHA1 
+
 
 Licence
 -------
