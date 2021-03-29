@@ -1,7 +1,7 @@
 Rainbow
 =======
 
-Yet another rainbow table generation and search tool software.
+Yet another rainbow table generation and search tool software. MD5, SHA1, SHA256 and SM3 were supported.
 
 Rainbow tables
 --------------
@@ -107,13 +107,13 @@ Attempt to crack a value with this table:
     750f4b11bbd880f9fb9bcd0c24b7b473  -
     $ ./rtcrack -x $(echo -n 6c02ec | md5sum) alpha4.rt
     750f4b11bbd880f9fb9bcd0c24b7b473 6c02ec
-
+    
     # for SHA1
     $ echo -n gPO100 | sha1sum                                      
     23a171799896ec207e64317d50d5d228b20ae15f  -
     $ ./rtcrack -x $(echo -n gPO100 | sha1sum) alpha4.rt
     c600f900c711b0fe548b922c157f9dc1864ff06b gPO100
-
+    
     # for SHA256
     $ echo -n j70000 | sha256sum                                      
     54b112f3a7214022afe20797c42983f9fb0d87ee4c6658791f8bc001a79653f8  -
@@ -167,7 +167,7 @@ At the same time, you should define a function, which is fit to the interface be
    >  void SHA1(uint8_t *dst, const uint8_t* src, uint64_t slen); 
 2. in the sha1.c, implement correct
 3. in the hashselect.h, you should include the "sha1.h", and add below:
-    
+   
     > #elif _SHA1 //a macro named "_SHA1"
     > #define DIGEST_LENGTH SHA1_DIGEST_LENGTH //in sha1.h
     > static HASHptr *my_hash = &SHA1;    // in sha1.h  , and the "SHA1" is your implement
